@@ -4,7 +4,7 @@ import java.util.Date;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import androidx.fragment.app.Fragment;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -62,7 +62,7 @@ public class DateFragment extends Fragment
     /**
      * Return an instance of DateFragment with its bundle filled with the
      * constructor arguments. The values in the bundle are retrieved in
-     * {@link #onCreateView()} below to properly initialize the DatePicker.
+     * {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)} ()} below to properly initialize the DatePicker.
      *
      * @param theme
      * @param year
