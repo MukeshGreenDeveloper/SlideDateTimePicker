@@ -9,10 +9,15 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
@@ -40,7 +45,7 @@ public class SlideDateTimeDialogFragment extends DialogFragment implements DateF
     private static SlideDateTimeListener mListener;
 
     private Context mContext;
-    private CustomViewPager mViewPager;
+    private androidx.viewpager2.widget.ViewPager2 mViewPager;
     private ViewPagerAdapter mViewPagerAdapter;
     private SlidingTabLayout mSlidingTabLayout;
     private View mButtonHorizontalDivider;
@@ -69,7 +74,7 @@ public class SlideDateTimeDialogFragment extends DialogFragment implements DateF
      * <p>Return a new instance of {@code SlideDateTimeDialogFragment} with its bundle
      * filled with the incoming arguments.</p>
      *
-     * <p>Called by {@link SlideDateTimePicker#show()}.</p>
+     * <p>Called by {@link SlideDateTimePicker#show(FragmentManager)}.</p>
      *
      * @param listener
      * @param initialDate
@@ -181,7 +186,7 @@ public class SlideDateTimeDialogFragment extends DialogFragment implements DateF
 
     private void setupViews(View v)
     {
-        mViewPager = (CustomViewPager) v.findViewById(R.id.viewPager);
+        mViewPager = (androidx.viewpager2.widget.ViewPager2) v.findViewById(R.id.viewPager);
         mSlidingTabLayout = (SlidingTabLayout) v.findViewById(R.id.slidingTabLayout);
         mButtonHorizontalDivider = v.findViewById(R.id.buttonHorizontalDivider);
         mButtonVerticalDivider = v.findViewById(R.id.buttonVerticalDivider);
@@ -217,7 +222,7 @@ public class SlideDateTimeDialogFragment extends DialogFragment implements DateF
 
     private void initViewPager()
     {
-        mViewPagerAdapter = new ViewPagerAdapter(getChildFragmentManager());
+        mViewPagerAdapter = new ViewPagerAdapter((FragmentActivity)mContext);
         mViewPager.setAdapter(mViewPagerAdapter);
 
         // Setting this custom layout for each tab ensures that the tabs will
@@ -359,45 +364,42 @@ public class SlideDateTimeDialogFragment extends DialogFragment implements DateF
         mListener.onDateTimeCancel();
     }
 
-    private class ViewPagerAdapter extends FragmentPagerAdapter
+    private class ViewPagerAdapter extends FragmentStateAdapter
     {
-        public ViewPagerAdapter(FragmentManager fm)
+        public ViewPagerAdapter(FragmentActivity fm)
         {
             super(fm);
         }
 
+        @NonNull
         @Override
-        public Fragment getItem(int position)
-        {
+        public Fragment createFragment(int position) {
             switch (position)
             {
-            case 0:
-                DateFragment dateFragment = DateFragment.newInstance(
-                    mTheme,
-                    mCalendar.get(Calendar.YEAR),
-                    mCalendar.get(Calendar.MONTH),
-                    mCalendar.get(Calendar.DAY_OF_MONTH),
-                    mMinDate,
-                    mMaxDate);
-                dateFragment.setTargetFragment(SlideDateTimeDialogFragment.this, 100);
-                return dateFragment;
-            case 1:
-                TimeFragment timeFragment = TimeFragment.newInstance(
-                    mTheme,
-                    mCalendar.get(Calendar.HOUR_OF_DAY),
-                    mCalendar.get(Calendar.MINUTE),
-                    mIsClientSpecified24HourTime,
-                    mIs24HourTime);
-                timeFragment.setTargetFragment(SlideDateTimeDialogFragment.this, 200);
-                return timeFragment;
-            default:
-                return null;
+                case 0:
+                    DateFragment dateFragment = DateFragment.newInstance(
+                            mTheme,
+                            mCalendar.get(Calendar.YEAR),
+                            mCalendar.get(Calendar.MONTH),
+                            mCalendar.get(Calendar.DAY_OF_MONTH),
+                            mMinDate,
+                            mMaxDate);
+                    return dateFragment;
+                case 1:
+                    TimeFragment timeFragment = TimeFragment.newInstance(
+                            mTheme,
+                            mCalendar.get(Calendar.HOUR_OF_DAY),
+                            mCalendar.get(Calendar.MINUTE),
+                            mIsClientSpecified24HourTime,
+                            mIs24HourTime);
+                    return timeFragment;
+                default:
+                    return null;
             }
         }
 
         @Override
-        public int getCount()
-        {
+        public int getItemCount() {
             return 2;
         }
     }

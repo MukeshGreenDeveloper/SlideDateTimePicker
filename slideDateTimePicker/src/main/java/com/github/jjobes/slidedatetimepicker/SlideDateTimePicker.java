@@ -57,7 +57,7 @@ public class SlideDateTimePicker
      * <p>Sets the listener that is used to inform the client when
      * the user selects a new date and time.</p>
      *
-     * <p>This must be called before {@link #show()}.</p>
+     * <p>This must be called before {@link #show(FragmentManager)}.</p>
      *
      * @param listener
      */
@@ -84,7 +84,7 @@ public class SlideDateTimePicker
     /**
      * <p>Sets the minimum date that the DatePicker should show.</p>
      *
-     * <p>This must be called before {@link #show()}.</p>
+     * <p>This must be called before {@link #show(FragmentManager)}.</p>
      *
      * @param minDate  the minimum selectable date for the DatePicker
      */
@@ -96,7 +96,7 @@ public class SlideDateTimePicker
     /**
      * <p>Sets the maximum date that the DatePicker should show.</p>
      *
-     * <p>This must be called before {@link #show()}.</p>
+     * <p>This must be called before {@link #show(FragmentManager)}.</p>
      *
      * @param maxDate  the maximum selectable date for the DatePicker
      */
@@ -119,7 +119,7 @@ public class SlideDateTimePicker
      *
      * <p>This also affects the time displayed in the tab.</p>
      *
-     * <p>Must be called before {@link #show()}.</p>
+     * <p>Must be called before {@link #show(FragmentManager)}.</p>
      *
      * @param is24HourTime  <tt>true</tt> to force 24-hour time format,
      *                      <tt>false</tt> to force 12-hour (AM/PM) time
@@ -155,9 +155,10 @@ public class SlideDateTimePicker
 
     /**
      * Shows the dialog to the user. Make sure to call
-     * {@link #setListener()} before calling this.
+     * {@link #setListener(SlideDateTimeListener)} ()} before calling this.
+     * @param supportFragmentManager
      */
-    public void show()
+    public void show(FragmentManager supportFragmentManager)
     {
         if (mListener == null)
         {
@@ -180,7 +181,7 @@ public class SlideDateTimePicker
                         mIs24HourTime,
                         mTheme,
                         mIndicatorColor);
-
+        mFragmentManager = supportFragmentManager;
         dialogFragment.show(mFragmentManager,
                 SlideDateTimeDialogFragment.TAG_SLIDE_DATE_TIME_DIALOG_FRAGMENT);
     }
@@ -277,7 +278,7 @@ public class SlideDateTimePicker
          * <p>Build and return a {@code SlideDateTimePicker} object based on the previously
          * supplied parameters.</p>
          *
-         * <p>You should call {@link #show()} immediately after this.</p>
+         * <p>You should call {@link #show(FragmentManager)} immediately after this.</p>
          *
          * @return
          */

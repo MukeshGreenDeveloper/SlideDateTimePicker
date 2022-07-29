@@ -67,7 +67,7 @@ public class SampleActivity extends FragmentActivity
                     //.setTheme(SlideDateTimePicker.HOLO_DARK)
                     //.setIndicatorColor(Color.parseColor("#990000"))
                     .build()
-                    .show();
+                    .show(getSupportFragmentManager());
             }
         });
     }

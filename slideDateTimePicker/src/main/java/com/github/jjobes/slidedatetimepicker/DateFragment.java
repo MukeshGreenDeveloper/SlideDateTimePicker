@@ -50,7 +50,7 @@ public class DateFragment extends Fragment
 
         try
         {
-            mCallback = (DateChangedListener) getTargetFragment();
+            mCallback = (DateChangedListener) getActivity().getSupportFragmentManager().findFragmentByTag(SlideDateTimeDialogFragment.TAG_SLIDE_DATE_TIME_DIALOG_FRAGMENT);
         }
         catch (ClassCastException e)
         {

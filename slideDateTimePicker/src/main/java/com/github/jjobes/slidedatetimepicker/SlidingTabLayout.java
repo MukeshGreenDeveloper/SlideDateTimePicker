@@ -21,6 +21,9 @@ package com.github.jjobes.slidedatetimepicker;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.os.Build;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 import android.util.AttributeSet;
@@ -33,6 +36,10 @@ import android.widget.HorizontalScrollView;
 import android.widget.TextView;
 
 import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.widget.ViewPager2;
+
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 
 /**
  * To be used with ViewPager to provide a tab indicator component which give constant feedback as to
@@ -40,7 +47,7 @@ import androidx.viewpager.widget.ViewPager;
  * <p>
  * To use the component, simply add it to your view hierarchy. Then in your
  * {@link android.app.Activity} or {@link androidx.fragment.app.Fragment} call
- * {@link #setViewPager(ViewPager)} providing it the ViewPager this layout is being used for.
+ * {@link #setViewPager(ViewPager2)} (ViewPager)} providing it the ViewPager this layout is being used for.
  * <p>
  * The colors can be customized in two ways. The first and simplest is to provide an array of colors
  * via {@link #setSelectedIndicatorColors(int...)} and {@link #setDividerColors(int...)}. The
@@ -87,8 +94,9 @@ public class SlidingTabLayout extends HorizontalScrollView {
     // Maps page index -> tab TextView
     private SparseArray<TextView> mTabTitleViews = new SparseArray<TextView>();
 
-    private ViewPager mViewPager;
-    private ViewPager.OnPageChangeListener mViewPagerPageChangeListener;
+    private androidx.viewpager2.widget.ViewPager2 mViewPager;
+    private ViewPager2.OnPageChangeCallback OnPageChangeCallback;
+   // private ViewPager.OnPageChangeListener mViewPagerPageChangeListener;
 
     private final SlidingTabStrip mTabStrip;
 
@@ -148,8 +156,8 @@ public class SlidingTabLayout extends HorizontalScrollView {
      *
      * @see ViewPager#setOnPageChangeListener(ViewPager.OnPageChangeListener)
      */
-    public void setOnPageChangeListener(ViewPager.OnPageChangeListener listener) {
-        mViewPagerPageChangeListener = listener;
+    public void setOnPageChangeListener(ViewPager2.OnPageChangeCallback listener) {
+        OnPageChangeCallback = listener;
     }
 
     /**
@@ -167,12 +175,12 @@ public class SlidingTabLayout extends HorizontalScrollView {
      * Sets the associated view pager. Note that the assumption here is that the pager content
      * (number of tabs and tab titles) does not change after this call has been made.
      */
-    public void setViewPager(ViewPager viewPager) {
+    public void setViewPager(ViewPager2 viewPager) {
         mTabStrip.removeAllViews();
 
         mViewPager = viewPager;
         if (viewPager != null) {
-            viewPager.setOnPageChangeListener(new InternalViewPagerListener());
+            viewPager.registerOnPageChangeCallback(new PageListener());
             populateTabStrip();
         }
     }
@@ -208,10 +216,10 @@ public class SlidingTabLayout extends HorizontalScrollView {
     }
 
     private void populateTabStrip() {
-        final PagerAdapter adapter = mViewPager.getAdapter();
+        final RecyclerView.Adapter adapter = mViewPager.getAdapter();
         final View.OnClickListener tabClickListener = new TabClickListener();
 
-        for (int i = 0; i < adapter.getCount(); i++) {
+        for (int i = 0; i < adapter.getItemCount(); i++) {
             View tabView = null;
             TextView tabTitleView = null;
 
@@ -230,7 +238,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
                 tabTitleView = (TextView) tabView;
             }
 
-            tabTitleView.setText(adapter.getPageTitle(i));
+            //tabTitleView.setText("Tab "+1);
             tabView.setOnClickListener(tabClickListener);
 
             // Used to get a reference to each tab's TextView in order to
@@ -258,7 +266,6 @@ public class SlidingTabLayout extends HorizontalScrollView {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-
         if (mViewPager != null) {
             scrollToTab(mViewPager.getCurrentItem(), 0);
         }
@@ -283,9 +290,8 @@ public class SlidingTabLayout extends HorizontalScrollView {
         }
     }
 
-    private class InternalViewPagerListener implements ViewPager.OnPageChangeListener {
+    private class  PageListener extends ViewPager2.OnPageChangeCallback {
         private int mScrollState;
-
         @Override
         public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
             int tabStripChildCount = mTabStrip.getChildCount();
@@ -301,34 +307,82 @@ public class SlidingTabLayout extends HorizontalScrollView {
                     : 0;
             scrollToTab(position, extraOffset);
 
-            if (mViewPagerPageChangeListener != null) {
-                mViewPagerPageChangeListener.onPageScrolled(position, positionOffset,
+            if (OnPageChangeCallback != null) {
+                OnPageChangeCallback.onPageScrolled(position, positionOffset,
                         positionOffsetPixels);
             }
+            //super.onPageScrolled(position, positionOffset, positionOffsetPixels);
         }
 
         @Override
         public void onPageScrollStateChanged(int state) {
+            //super.onPageScrollStateChanged(state);
             mScrollState = state;
 
-            if (mViewPagerPageChangeListener != null) {
-                mViewPagerPageChangeListener.onPageScrollStateChanged(state);
+            if (OnPageChangeCallback != null) {
+                OnPageChangeCallback.onPageScrollStateChanged(state);
             }
         }
 
         @Override
         public void onPageSelected(int position) {
+            //super.onPageSelected(position);
             if (mScrollState == ViewPager.SCROLL_STATE_IDLE) {
                 mTabStrip.onViewPagerPageChanged(position, 0f);
                 scrollToTab(position, 0);
             }
 
-            if (mViewPagerPageChangeListener != null) {
-                mViewPagerPageChangeListener.onPageSelected(position);
+            if (OnPageChangeCallback != null) {
+                OnPageChangeCallback.onPageSelected(position);
             }
         }
-
     }
+//    private class InternalViewPagerListener implements ViewPager.OnPageChangeListener {
+//        private int mScrollState;
+//
+//        @Override
+//        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+//            int tabStripChildCount = mTabStrip.getChildCount();
+//            if ((tabStripChildCount == 0) || (position < 0) || (position >= tabStripChildCount)) {
+//                return;
+//            }
+//
+//            mTabStrip.onViewPagerPageChanged(position, positionOffset);
+//
+//            View selectedTitle = mTabStrip.getChildAt(position);
+//            int extraOffset = (selectedTitle != null)
+//                    ? (int) (positionOffset * selectedTitle.getWidth())
+//                    : 0;
+//            scrollToTab(position, extraOffset);
+//
+//            if (mViewPagerPageChangeListener != null) {
+//                mViewPagerPageChangeListener.onPageScrolled(position, positionOffset,
+//                        positionOffsetPixels);
+//            }
+//        }
+//
+//        @Override
+//        public void onPageScrollStateChanged(int state) {
+//            mScrollState = state;
+//
+//            if (mViewPagerPageChangeListener != null) {
+//                mViewPagerPageChangeListener.onPageScrollStateChanged(state);
+//            }
+//        }
+//
+//        @Override
+//        public void onPageSelected(int position) {
+//            if (mScrollState == ViewPager.SCROLL_STATE_IDLE) {
+//                mTabStrip.onViewPagerPageChanged(position, 0f);
+//                scrollToTab(position, 0);
+//            }
+//
+//            if (mViewPagerPageChangeListener != null) {
+//                mViewPagerPageChangeListener.onPageSelected(position);
+//            }
+//        }
+//
+//    }
 
     private class TabClickListener implements View.OnClickListener {
         @Override

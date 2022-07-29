@@ -52,7 +52,7 @@ public class TimeFragment extends Fragment
 
         try
         {
-            mCallback = (TimeChangedListener) getTargetFragment();
+            mCallback = (TimeChangedListener) getActivity().getSupportFragmentManager().findFragmentByTag(SlideDateTimeDialogFragment.TAG_SLIDE_DATE_TIME_DIALOG_FRAGMENT);
         }
         catch (ClassCastException e)
         {
@@ -64,7 +64,7 @@ public class TimeFragment extends Fragment
     /**
      * Return an instance of TimeFragment with its bundle filled with the
      * constructor arguments. The values in the bundle are retrieved in
-     * {@link #onCreateView()} below to properly initialize the TimePicker.
+     * {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)} ()} below to properly initialize the TimePicker.
      *
      * @param theme
      * @param hour
@@ -141,7 +141,7 @@ public class TimeFragment extends Fragment
             // If the client does not specify a 24-hour time format, use the
             // device default.
             mTimePicker.setIs24HourView(DateFormat.is24HourFormat(
-                getTargetFragment().getActivity()));
+                getActivity()));
         }
 
         mTimePicker.setCurrentHour(initialHour);
